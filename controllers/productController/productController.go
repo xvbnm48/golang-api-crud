@@ -53,6 +53,26 @@ func Create(c *gin.Context) {
 	})
 }
 
-func Update(c *gin.Context) {}
+func Update(c *gin.Context) {
+	var product models.Product
+	id := c.Param("id")
+
+	if err := c.ShouldBindJSON(&product); err != nil {
+		c.AbortWithStatusJSON(400, gin.H{
+			"message": "Bad request",
+		})
+		return
+	}
+	if models.DB.Model(&product).Where("id = ?", id).Updates(&product).RowsAffected == 0 {
+		c.AbortWithStatusJSON(404, gin.H{
+			"message": "Record not found",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "Record updated successfully",
+	})
+}
 
 func Delete(c *gin.Context) {}
