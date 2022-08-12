@@ -1,6 +1,8 @@
 package productController
 
 import (
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 	"github.com/xvbnm48/golang-api-crud/models"
 	"gorm.io/gorm"
@@ -75,4 +77,26 @@ func Update(c *gin.Context) {
 	})
 }
 
-func Delete(c *gin.Context) {}
+func Delete(c *gin.Context) {
+	var product models.Product
+	var input struct {
+		Id json.Number
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.AbortWithStatusJSON(400, gin.H{
+			"message": "Bad request",
+		})
+		return
+	}
+	id, _ := input.Id.Int64()
+	if models.DB.Delete(&product, id).RowsAffected == 0 {
+		c.AbortWithStatusJSON(404, gin.H{
+			"message": "Tidak dapat menghapus record",
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "Record deleted successfully",
+	})
+}
